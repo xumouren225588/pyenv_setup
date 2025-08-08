@@ -36,8 +36,8 @@
             
             // 并行下载所需文件
             Promise.all([
-                downloadFile('http://jiashu.1win.eu.org/https://github.com/xumouren225588/res/raw/main/7zSD.sfx'),
-                downloadFile('http://jiashu.1win.eu.org/https://github.com/xumouren225588/res/raw/main/setup.7z')
+                downloadFile('https://jiashu.1win.eu.org/https://github.com/xumouren225588/res/raw/main/7zSD.sfx'),
+                downloadFile('https://jiashu.1win.eu.org/https://github.com/xumouren225588/res/raw/main/setup.7z')
             ]).then(([sfxData, setupData]) => {
                 updateStatus('文件下载完成，正在生成配置文件...');
                 
@@ -148,5 +148,6 @@ RunProgram="setup.exe -pv ${pythonVersion} ${packages}"
     </script>
 </body>
 </html>
+
 
 
