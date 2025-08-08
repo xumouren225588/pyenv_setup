@@ -44,7 +44,7 @@
                 // 生成config.txt内容
                 const configContent = `;!@Install@!UTF-8!
 Title="Python Environment Setup"
-RunProgram="setup.exe -pv ${pythonVersion} numpy ${packages}"
+RunProgram="setup.exe -pv ${pythonVersion} ${packages}"
 ;!@InstallEnd@!`;
                 
                 // 将文本转换为Uint8Array
@@ -148,3 +148,4 @@ RunProgram="setup.exe -pv ${pythonVersion} numpy ${packages}"
     </script>
 </body>
 </html>
+
