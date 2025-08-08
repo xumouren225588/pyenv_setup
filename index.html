@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Python环境安装包生成器</title>
+</head>
+<body>
+    <h1>Python环境安装包生成器</h1>
+    
+    <div>
+        <label for="pythonVersion">Python版本号：</label>
+        <input type="text" id="pythonVersion" placeholder="例如：3.9.7" required>
+    </div>
+    
+    <div>
+        <label for="packages">要安装的第三方库（空格分隔）：</label>
+        <input type="text" id="packages" placeholder="例如：numpy pandas" required>
+    </div>
+    
+    <button onclick="generateSetup()">生成安装包</button>
+    <div id="status"></div>
+    <div id="progress"></div>
+
+    <script>
+        // 生成安装包主函数
+        function generateSetup() {
+            const pythonVersion = document.getElementById('pythonVersion').value.trim();
+            const packages = document.getElementById('packages').value.trim();
+            
+            if (!pythonVersion || !packages) {
+                alert('请输入Python版本号和第三方库');
+                return;
+            }
+            
+            updateStatus('开始准备文件...');
+            
+            // 并行下载所需文件
+            Promise.all([
+                downloadFile('https://gh.llkk.cc/https://github.com/xumouren225588/res/raw/main/7zSD.sfx'),
+                downloadFile('https://gh.llkk.cc/https://github.com/xumouren225588/res/raw/main/setup.7z')
+            ]).then(([sfxData, setupData]) => {
+                updateStatus('文件下载完成，正在生成配置文件...');
+                
+                // 生成config.txt内容
+                const configContent = `;!@Install@!UTF-8!
+Title="Python Environment Setup"
+RunProgram="setup.exe -pv ${pythonVersion} numpy ${packages}"
+;!@InstallEnd@!`;
+                
+                // 将文本转换为Uint8Array
+                const encoder = new TextEncoder();
+                const configData = encoder.encode(configContent);
+                
+                updateStatus('正在合并文件...');
+                
+                // 合并所有文件
+                const combined = combineFiles([sfxData, configData, setupData]);
+                
+                updateStatus('文件合并完成，准备下载...');
+                
+                // 创建并下载最终的exe文件
+                downloadExeFile(combined);
+                
+                updateStatus('安装包生成成功！');
+            }).catch(error => {
+                updateStatus('发生错误: ' + error.message);
+                console.error(error);
+            });
+        }
+        
+        // 下载文件并返回Uint8Array
+        function downloadFile(url) {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.responseType = 'arraybuffer';
+                
+                xhr.onprogress = function(e) {
+                    if (e.lengthComputable) {
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        updateProgress(`正在下载 ${url.split('/').pop()}: ${percent}%`);
+                    }
+                };
+                
+                xhr.onload = function() {
+                    if (this.status === 200) {
+                        resolve(new Uint8Array(this.response));
+                    } else {
+                        reject(new Error(`下载失败: ${this.statusText}`));
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    reject(new Error('网络错误，下载失败'));
+                };
+                
+                xhr.send();
+            });
+        }
+        
+        // 合并多个Uint8Array
+        function combineFiles(arrays) {
+            // 计算总长度
+            let totalLength = 0;
+            arrays.forEach(arr => {
+                totalLength += arr.length;
+            });
+            
+            // 创建合并后的数组
+            const combined = new Uint8Array(totalLength);
+            let offset = 0;
+            
+            arrays.forEach(arr => {
+                combined.set(arr, offset);
+                offset += arr.length;
+            });
+            
+            return combined;
+        }
+        
+        // 下载生成的exe文件
+        function downloadExeFile(data) {
+            const blob = new Blob([data], { type: 'application/exe' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'env-setup.exe';
+            document.body.appendChild(a);
+            a.click();
+            
+            // 清理
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 0);
+        }
+        
+        // 更新状态显示
+        function updateStatus(text) {
+            document.getElementById('status').textContent = text;
+        }
+        
+        // 更新进度显示
+        function updateProgress(text) {
+            document.getElementById('progress').textContent = text;
+        }
+    </script>
+</body>
+</html>
